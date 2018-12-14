@@ -3,7 +3,7 @@
 import socket               # 导入 socket 模块
 from numpy import *
 s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)         # 创建 socket 对象
-s.setblocking(True)
+#s.setblocking(False)
 host = '192.168.1.145'
 port = 49152                # 设置端口号
 
@@ -24,7 +24,7 @@ def dec2hex(string_num):
 def bin2dec(string_num):
     return str(int(string_num,2))
 
-def F2num(arr):
+def F2num(arr):  # 将得到的向量进行解算，得到力的大小
     S = 0
     for i in range(8):
         S += arr[i]*(16**(7-i))
@@ -35,9 +35,6 @@ def F2num(arr):
 
 data = uint8([hex2dec('12'),hex2dec('34'),hex2dec('00'),hex2dec('02'),hex2dec('00'),hex2dec('00'),hex2dec('00'),hex2dec('00')])
 s.sendto(data,('192.168.1.145',port))
-#while(True):
- #   print(bin2dec(s.recv(36)))
-
 while(True):
     str_info = s.recv(36)
     if not str_info:
@@ -50,19 +47,14 @@ while(True):
 
     output_tmp = array(b).reshape(9,8)
     print(output_tmp)
-   # output_tmp = output_tmp.T
     output_tmp = delete(output_tmp,[0,1,2],axis=0)
-    F_x = output_tmp[0,:]
-    F_y = output_tmp[1,:]
-    F_z = output_tmp[2,:]
-    
-   # print(F_x)
-   # print(F_y)
-   # print(F_z)
-    print(F2num(F_x))
+    F_x = F2num(output_tmp[0,:])
+    F_y = F2num(output_tmp[1,:])
+    F_z = F2num(output_tmp[2,:])
+    T_x = F2num(output_tmp[3,:])
+    T_y = F2num(output_tmp[4,:])
+    T_z = F2num(output_tmp[5,:])
+    print(F_x)
+    print(F_y)
+    print(F_z)
 s.close()  
-
-
-
-# ord chr str ascii .encode .decode can't work 
-# I want to change '\x00' to num between 0 and 255
