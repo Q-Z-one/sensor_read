@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 import socket               # 导入 socket 模块
 from numpy import *
+import pudb
 s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)         # 创建 socket 对象
 s.setblocking(True)
 host = '192.168.1.145'
@@ -35,8 +36,6 @@ def F2num(arr):
 
 data = uint8([hex2dec('12'),hex2dec('34'),hex2dec('00'),hex2dec('02'),hex2dec('00'),hex2dec('00'),hex2dec('00'),hex2dec('00')])
 s.sendto(data,('192.168.1.145',port))
-#while(True):
- #   print(bin2dec(s.recv(36)))
 
 while(True):
     str_info = s.recv(36)
@@ -50,19 +49,20 @@ while(True):
 
     output_tmp = array(b).reshape(9,8)
     print(output_tmp)
-   # output_tmp = output_tmp.T
     output_tmp = delete(output_tmp,[0,1,2],axis=0)
-    F_x = output_tmp[0,:]
-    F_y = output_tmp[1,:]
-    F_z = output_tmp[2,:]
+    F_x = F2num(output_tmp[0,:])
+    F_y = F2num(output_tmp[1,:])
+    F_z = F2num(output_tmp[2,:])
+    T_x = F2num(output_tmp[3,:])
+    T_y = F2num(output_tmp[4,:])
+    T_z = F2num(output_tmp[5,:])
     
-   # print(F_x)
-   # print(F_y)
-   # print(F_z)
-    print(F2num(F_x))
+    print(F_x)
+    print(F_y)
+    print(F_z)
 s.close()  
 
 
-
+# Some issues that have been closed:
 # ord chr str ascii .encode .decode can't work 
 # I want to change '\x00' to num between 0 and 255
