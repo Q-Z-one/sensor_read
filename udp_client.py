@@ -3,8 +3,10 @@
 import socket               # 导入 socket 模块
 from numpy import *
 import pudb
+import datetime
 s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)         # 创建 socket 对象
 #s.setblocking(False)
+s.settimeout(0.002) #采样频率1khz，超时丢失一个点
 host = '192.168.1.145'
 port = 49152                # 设置端口号
 
@@ -33,31 +35,43 @@ def F2num(arr):  # 将得到的向量进行解算，得到力的大小
         return float(S)/1000000
     else:
         return -float(2**32-1-S)/1000000
-
+filetime = datetime.datetime.now().strftime('%Y-%m-%d,%H:%M:%S')
 data = uint8([hex2dec('12'),hex2dec('34'),hex2dec('00'),hex2dec('02'),hex2dec('00'),hex2dec('00'),hex2dec('00'),hex2dec('00')])
 s.sendto(data,('192.168.1.145',port))
-while(True):
-    str_info = s.recv(36)
-    if not str_info:
-        break
-    b = []
-    for everybyte in str_info:
-        num = int(ord(everybyte))
-        b.append(num/16)
-        b.append(num-(num/16)*16)
+with open(str(filetime)+'.txt','w') as f: # 以时间作为文件名
+    while(True):
+        try:
+            str_info = s.recv(36)
+            if not str_info:
+                break
+            b = []
+            for everybyte in str_info:
+                num = int(ord(everybyte))
+                b.append(num/16)
+                b.append(num-(num/16)*16)
 
-    output_tmp = array(b).reshape(9,8)
-    print(output_tmp)
-    output_tmp = delete(output_tmp,[0,1,2],axis=0)
-    F_x = F2num(output_tmp[0,:])
-    F_y = F2num(output_tmp[1,:])
-    F_z = F2num(output_tmp[2,:])
-    T_x = F2num(output_tmp[3,:])
-    T_y = F2num(output_tmp[4,:])
-    T_z = F2num(output_tmp[5,:])
-    print(F_x)
-    print(F_y)
-    print(F_z)
+            output_tmp = array(b).reshape(9,8)
+            print(output_tmp)
+            output_tmp = delete(output_tmp,[0,1,2],axis=0)
+            F_x = F2num(output_tmp[0,:])
+            F_y = F2num(output_tmp[1,:])
+            F_z = F2num(output_tmp[2,:])
+            T_x = F2num(output_tmp[3,:])
+            T_y = F2num(output_tmp[4,:])
+            T_z = F2num(output_tmp[5,:])
+            f.write(str(F_x)+'\n')
+            f.write(str(F_y)+'\n')
+            f.write(str(F_z)+'\n')
+            f.write(str(T_x)+'\n')
+            f.write(str(T_y)+'\n')
+            f.write(str(T_z)+'\n')
+            #print(F_x)
+            #print(F_y)
+            #print(F_z)
+            #time.sleep(0.001)
+        except Exception,e:
+            print(e)
+            s.sendto(data,('192.168.1.145',port))
 s.close()  
 
 # Some issues that have been closed:
